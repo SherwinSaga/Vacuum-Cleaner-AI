@@ -17,7 +17,7 @@ namespace RobotClean
         private Image image;
         private Timer timer;
         private Robot robot;
-
+        private bool isStart;
         public Form1()
         {
             InitializeComponent();
@@ -27,6 +27,7 @@ namespace RobotClean
             Bitmap bm = new Bitmap(image, 150, 150);
             pictureBox1.Image = bm;
             pictureBox1.Visible = false;
+            isStart = false;
 
             robot = new Robot();
             setLabels();
@@ -62,7 +63,7 @@ namespace RobotClean
                 quadrant = Getquadrant();
 
                 Console.WriteLine($"Robot cleaned dirt at ({x}, {y})");
-                textBox1.AppendText($"Robot cleaned dirt at {quadrant}\r\n");
+                textBox1.AppendText($"CLEANED dirt at {quadrant}\r\n");
 
             }
             else
@@ -71,8 +72,10 @@ namespace RobotClean
                 int x = robot.GetLocationX();
                 int y = robot.GetLocationY();
                 quadrant = Getquadrant();
+
                 Console.WriteLine($"NoOp - Robot moved {move} to ({x}, {y})");
-                textBox1.AppendText($"Robot moved {move} to {quadrant}\r\n");
+                textBox1.AppendText($"Moved {move}\r\n");
+
                 robotCurrentLocation();
             }
         }
@@ -178,28 +181,40 @@ namespace RobotClean
        
 
         private void button1_Click(object sender, EventArgs e)
-        {
-            robotCurrentLocation();
-            verifyEnvironment();
-            timer = new Timer();
-            timer.Interval = 1500;
-            timer.Tick += timer1_Tick;
-            timer.Start();
+        {         
+            if (!isStart)
+            {
+                robotCurrentLocation();
+                verifyEnvironment();
+                pictureBox1.Visible = true;
 
-            pictureBox1.Visible = true;
-            this.BackColor = Color.WhiteSmoke;
+                timer = new Timer();
+                timer.Interval = 1500;
+                timer.Tick += timer1_Tick;
+                timer.Start();
 
+                isStart = true;
+                button1.Enabled = false;
+                button2.Enabled = true;
+            }
+            else
+            {
+                timer.Start();
+                button1.Enabled = false;
+                button2.Enabled = true;
+            }
         }
 
         private void button2_Click(object sender, EventArgs e)
         {
-
             if(timer != null)
             {
                 timer.Stop();
-                this.BackColor = Color.IndianRed;
+                textBox1.AppendText("--STOPPED--\r\n");
+                button2.Enabled = false;
+                button1.Enabled = true;
+
             }
-            
         }
 
         private void button3_Click(object sender, EventArgs e)
