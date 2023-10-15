@@ -52,13 +52,17 @@ namespace RobotClean
 
         private void timer1_Tick(object sender, EventArgs e)
         {
+            Char quadrant;
             if (robot.IsDirty())
             {
                 int x = robot.GetLocationX();
                 int y = robot.GetLocationY();
                 robot.Clean();
                 verifyEnvironment();
+                quadrant = Getquadrant();
+
                 Console.WriteLine($"Robot cleaned dirt at ({x}, {y})");
+                textBox1.AppendText($"Robot cleaned dirt at {quadrant}\r\n");
 
             }
             else
@@ -66,7 +70,9 @@ namespace RobotClean
                 Action move = robot.RandomMove();
                 int x = robot.GetLocationX();
                 int y = robot.GetLocationY();
+                quadrant = Getquadrant();
                 Console.WriteLine($"NoOp - Robot moved {move} to ({x}, {y})");
+                textBox1.AppendText($"Robot moved {move} to {quadrant}\r\n");
                 robotCurrentLocation();
             }
         }
@@ -98,6 +104,19 @@ namespace RobotClean
                 tempy = 450;
             }
             pictureBox1.Location = new Point(tempx -75, tempy-75);
+        }
+
+        private char Getquadrant() {
+            char quad = 'A';
+            int x = robot.GetLocationX();
+            int y = robot.GetLocationY();
+
+            if(x == 0 && y == 0) { quad = 'A'; }
+            if (x == 0 && y == 1) { quad = 'B'; }
+            if (x == 1 && y == 1) { quad = 'C'; }
+            if (x == 1 && y == 0) { quad = 'D'; }
+
+            return quad;
         }
 
         private void setLabels()
