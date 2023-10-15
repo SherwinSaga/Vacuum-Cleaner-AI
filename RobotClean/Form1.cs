@@ -5,6 +5,7 @@ using System.ComponentModel;
 using System.Data;
 using System.Drawing;
 using System.Linq;
+using System.Linq.Expressions;
 using System.Text;
 using System.Threading.Tasks;
 using System.Windows.Forms;
@@ -25,12 +26,11 @@ namespace RobotClean
             image = Properties.Resources.ROBOT;
             Bitmap bm = new Bitmap(image, 150, 150);
             pictureBox1.Image = bm;
+            pictureBox1.Visible = false;
 
             robot = new Robot();
             setLabels();
-            verifyEnvironment();
-            robotCurrentLocation();
-
+    
         }
 
         private void Form1_Paint(object sender, PaintEventArgs e)
@@ -42,20 +42,16 @@ namespace RobotClean
             g.DrawLine(p, 5, 5, 600, 5);
             g.DrawLine(p, 5, 600, 600, 600);
             g.DrawLine(p, 600, 5, 600, 600);
+
             g.DrawLine(p, 300, 5, 300, 300);
             g.DrawLine(p, 5, 300, 300, 300);
             g.DrawLine(p, 300, 600, 300, 300);
             g.DrawLine(p, 300, 300, 600, 300);
+
         }
 
         private void timer1_Tick(object sender, EventArgs e)
         {
-            VacuumSetComplete();
-        }
-
-        private void VacuumSetComplete()
-        {
-            
             if (robot.IsDirty())
             {
                 int x = robot.GetLocationX();
@@ -63,7 +59,6 @@ namespace RobotClean
                 robot.Clean();
                 verifyEnvironment();
                 Console.WriteLine($"Robot cleaned dirt at ({x}, {y})");
-                robotCurrentLocation();
 
             }
             else
@@ -107,27 +102,90 @@ namespace RobotClean
 
         private void setLabels()
         {
-            quadrantA.Location = new Point(150, 150);
-            quadrantB.Location = new Point(450, 150);
-            quadrantC.Location = new Point(450, 450);
-            quadrantD.Location = new Point(150, 450);
+            quadrantA.Location = new Point(125, 50);
+            quadrantB.Location = new Point(425, 50);
+            quadrantC.Location = new Point(425, 350);
+            quadrantD.Location = new Point(125, 350);
         }
 
         private void verifyEnvironment()
         {
             int[,] temp = robot.getEnvironment();
-            quadrantA.Text = temp[0, 0] == 1 ? "DIRTY" : "CLEAN";
-            quadrantB.Text = temp[0, 1] == 1 ? "DIRTY" : "CLEAN";
-            quadrantC.Text = temp[1, 1] == 1 ? "DIRTY" : "CLEAN";
-            quadrantD.Text = temp[1, 0] == 1 ? "DIRTY" : "CLEAN";
+
+            if(temp[0, 0] == 1)
+            {
+                quadrantA.Text = "DIRTY";
+                quadrantA.ForeColor = Color.Red;
+            }
+            else
+            {
+                quadrantA.Text = "CLEAN";
+                quadrantA.ForeColor = Color.Black;
+            }
+
+            if (temp[0, 1] == 1)
+            {
+                quadrantB.Text = "DIRTY";
+                quadrantB.ForeColor = Color.Red;
+            }
+            else
+            {
+                quadrantB.Text = "CLEAN";
+                quadrantB.ForeColor = Color.Black;
+            }
+
+            if (temp[1, 0] == 1)
+            {
+                quadrantD.Text = "DIRTY";
+                quadrantD.ForeColor = Color.Red;
+            }
+            else
+            {
+                quadrantD.Text = "CLEAN";
+                quadrantD.ForeColor = Color.Black;
+            }
+
+            if (temp[1, 1] == 1)
+            {
+                quadrantC.Text = "DIRTY";
+                quadrantC.ForeColor = Color.Red;
+            }
+            else
+            {
+                quadrantC.Text = "CLEAN";
+                quadrantC.ForeColor = Color.Black;
+            }
         }
+       
 
         private void button1_Click(object sender, EventArgs e)
         {
+            robotCurrentLocation();
+            verifyEnvironment();
             timer = new Timer();
-            timer.Interval = 3000;
+            timer.Interval = 1500;
             timer.Tick += timer1_Tick;
             timer.Start();
+
+            pictureBox1.Visible = true;
+            this.BackColor = Color.WhiteSmoke;
+
+        }
+
+        private void button2_Click(object sender, EventArgs e)
+        {
+
+            if(timer != null)
+            {
+                timer.Stop();
+                this.BackColor = Color.IndianRed;
+            }
+            
+        }
+
+        private void button3_Click(object sender, EventArgs e)
+        {
+            Application.Restart();
         }
     }
 
@@ -158,12 +216,6 @@ namespace RobotClean
 
         public Action RandomMove()
         {
-            Action[] possibleMoves = { Action.Up, Action.Down, Action.Left, Action.Right };
-            Action randomDirection = possibleMoves[random.Next(4)];
-
-            // ArrayList possible = new ArrayList();
-            // dynamic possible moves
-
             int choose = random.Next(2);
             if(GetLocationX() == 0 && GetLocationY() == 0)
             {
@@ -223,31 +275,6 @@ namespace RobotClean
 
             return Action.NoOp;
 
-            /* inefficient piece of shit
-
-            switch (randomDirection)
-            {
-                case Action.Up:
-                    if (currY > 0) currY--;
-                    else return Action.NoOp;
-                    break;
-                case Action.Down:
-                    if (currY < 1) currY++;
-                    else return Action.NoOp;
-                    break;
-                case Action.Left:
-                    if (currX > 0) currX--;
-                    else return Action.NoOp;
-                    break;
-                case Action.Right:
-                    if (currX < 1) currX++;
-                    else return Action.NoOp;
-                    break;
-                default:
-                    break;
-            }
-            return randomDirection;
-            */
         }
 
         public bool IsDirty()
